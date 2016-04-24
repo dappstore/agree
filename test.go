@@ -6,7 +6,7 @@ type MockOracle map[string]string
 var _ Oracle = MockOracle{}
 
 // GetOracleView implement `Oracle`
-func (o MockOracle) GetOracleView(key string) ([]byte, error) {
+func (o MockOracle) GetOracleView(domain, key string) ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}

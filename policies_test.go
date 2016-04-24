@@ -8,6 +8,8 @@ import (
 )
 
 func TestPolicy_RequireOracle(t *testing.T) {
+	d := "some-domain"
+	k := "some-key"
 	sys := &System{
 		Policies: []Policy{
 			RequireOracle{},
@@ -15,18 +17,20 @@ func TestPolicy_RequireOracle(t *testing.T) {
 	}
 
 	// no oracle
-	_, err := sys.Get("some-key")
+	_, err := sys.Get(d, k)
 	assert.EqualError(t, err, "require-oracle: no oracles configured")
 
 	// one oracle
 	sys.Oracles = append(sys.Oracles, MockOracle{})
 	require.Len(t, sys.Oracles, 1, "bad oracle count")
 
-	_, err = sys.Get("some-key")
+	_, err = sys.Get(d, k)
 	assert.NoError(t, err)
 }
 
 func TestPolicy_UnanimousConsent(t *testing.T) {
+	d := "some-domain"
+	k := "some-key"
 	sys := &System{
 		Oracles: []Oracle{
 			MockOracle{"some-key": "some-value"},
@@ -37,7 +41,7 @@ func TestPolicy_UnanimousConsent(t *testing.T) {
 	}
 
 	// single oracle
-	v, err := sys.Get("some-key")
+	v, err := sys.Get(d, k)
 	if assert.NoError(t, err) {
 		assert.Equal(t, []byte("some-value"), v)
 	}
@@ -46,7 +50,7 @@ func TestPolicy_UnanimousConsent(t *testing.T) {
 	sys.Oracles = append(sys.Oracles, sys.Oracles[0])
 	require.Len(t, sys.Oracles, 2, "bad oracle count")
 
-	v, err = sys.Get("some-key")
+	v, err = sys.Get(d, k)
 	if assert.NoError(t, err) {
 		assert.Equal(t, []byte("some-value"), v)
 	}
@@ -55,14 +59,14 @@ func TestPolicy_UnanimousConsent(t *testing.T) {
 	sys.Oracles = append(sys.Oracles, MockOracle{"some-key": "some-other-value"})
 	require.Len(t, sys.Oracles, 3, "bad oracle count")
 
-	_, err = sys.Get("some-key")
+	_, err = sys.Get(d, k)
 	assert.EqualError(t, err, "unanimous-consent: oracles disagree")
 
 	//  empty oracles
 	sys.Oracles = nil
 	require.Len(t, sys.Oracles, 0, "bad oracle count")
 
-	v, err = sys.Get("some-key")
+	v, err = sys.Get(d, k)
 	assert.NoError(t, err)
 	assert.Nil(t, v)
 }

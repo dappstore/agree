@@ -38,7 +38,7 @@ func (p UnanimousConsent) ApplyAgreementPolicy(
 ) error {
 
 	for _, o := range sys.Oracles {
-		value, err := o.GetOracleView(query.Key)
+		value, err := o.GetOracleView(query.Domain, query.Key)
 		if err != nil {
 			return errors.Wrap(err, "unanimous-consent: oracle error")
 		}

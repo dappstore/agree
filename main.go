@@ -9,11 +9,12 @@ type Policy interface {
 // Oracle represents some external oracle, which can provide the view of some
 // key at any point in time.
 type Oracle interface {
-	GetOracleView(key string) ([]byte, error)
+	GetOracleView(domain string, key string) ([]byte, error)
 }
 
 // Query represents an in-progress query against an agreement system.
 type Query struct {
+	Domain string
 	Key    string
 	Result []byte
 	Err    error
@@ -28,8 +29,8 @@ type System struct {
 
 // Get resolves the value of `key` using `sys`.  Any policies configured on
 // `sys` will be used to augment the agreement.
-func (sys *System) Get(key string) ([]byte, error) {
-	q := &Query{Key: key}
+func (sys *System) Get(domain, key string) ([]byte, error) {
+	q := &Query{Domain: domain, Key: key}
 
 	for _, p := range sys.Policies {
 		err := p.ApplyAgreementPolicy(sys, q)
